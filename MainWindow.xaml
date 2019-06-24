@@ -1,0 +1,185 @@
+﻿<Window x:Class="LogMonitor.MainWindow"
+        x:Name="Wnd"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:LogMonitor"
+        xmlns:converter="clr-namespace:LogMonitor.Converters"
+        xmlns:res="clr-namespace:LogMonitor.Properties"
+        Width="{Binding WindowWidth, Mode=TwoWay}"
+        Height="{Binding WindowHeight, Mode=TwoWay}" 
+        Loaded="MainWindow_OnLoaded"
+        Title="{Binding Title}">
+    <Window.DataContext>
+        <local:MainWindowVm/>
+    </Window.DataContext>
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Icons.xaml"/>
+                <!--<ResourceDictionary Source="Resources/Scrollbar.xaml"/>-->
+            </ResourceDictionary.MergedDictionaries>
+            <converter:FilterConverter x:Key="FilterConverter"/>
+
+            <Style x:Key="LevelStyle" TargetType="TextBlock">
+                <Setter Property="Background" Value="{Binding Level, Converter={converter:LevelToBrushConverter}}"/>
+            </Style>
+
+            <Style x:Key="DateTimeColumnCellStyle" TargetType="DataGridCell">
+                <Setter Property="ToolTip" Value="{Binding Converter={converter:DateTimeFormatConverter}}"/>
+            </Style>
+
+            <x:Array x:Key="HighlightingColors" Type="SolidColorBrush">
+                <SolidColorBrush Color="Transparent"/>
+                <SolidColorBrush Color="#FFFFE4"/>
+                <SolidColorBrush Color="#FFFFC4"/>
+                <SolidColorBrush Color="#FFFFA4"/>
+            </x:Array>
+
+            <DataTemplate x:Key="DateTimeColumnHeaderTemplate">
+                <DockPanel HorizontalAlignment="Stretch">
+                    <CheckBox DockPanel.Dock="Left" x:Name="ShowYearCheckBox" VerticalAlignment="Center" Margin="0 0 5 0"
+                              IsChecked="{Binding DataContext.ShowYear, Mode=TwoWay, ElementName=Wnd}"
+                              ToolTip="{x:Static res:Resources.Columns_ShowDate}"/>
+                    <TextBlock Text="{Binding Content, RelativeSource={RelativeSource Mode=TemplatedParent}}"/>
+                </DockPanel>
+            </DataTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Grid>
+        <DockPanel>
+            <DockPanel Dock="Top" Margin="5">
+                <Button Command="{Binding RefreshLogCommand}" DockPanel.Dock="Left" Margin="0 0 2 0" 
+                        IsEnabled="{Binding IsRun, Converter={StaticResource InversedBooleanConverter}}"
+                        Content="{StaticResource RefreshArrow}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="Silver"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button DockPanel.Dock="Right"
+                        Width="Auto"
+                        Padding="20 0"
+                        Content="{x:Static res:Resources.Clear}"
+                        Command="{Binding ClearCommand}"/>
+                <Button DockPanel.Dock="Right"
+                        Width="Auto"
+                        Padding="20 0"
+                        IsEnabled="{Binding IsRun}"
+                        Content="{x:Static res:Resources.Stop}"
+                        Command="{Binding StopCommand}"/>
+                <Button DockPanel.Dock="Right"
+                        Width="Auto"
+                        Padding="20 0"
+                        IsEnabled="{Binding IsRun, Converter={StaticResource InversedBooleanConverter}}"
+                        Content="{x:Static res:Resources.Start}"
+                        Command="{Binding RunCommand}"/>
+                <Button DockPanel.Dock="Right"
+                        Width="20"
+                        Margin="0 0 10 0"
+                        IsEnabled="{Binding IsRun, Converter={StaticResource InversedBooleanConverter}}"
+                        Content="..."
+                        Command="{Binding BrowseLogCommand}"/>
+                <ComboBox ItemsSource="{Binding SavedFiles}"
+                          DisplayMemberPath="FileName"
+                          Text="{Binding FileName}"
+                          IsEnabled="{Binding IsRun, Converter={StaticResource InversedBooleanConverter}}"
+                          IsEditable="False"
+                          SelectionChanged="ComboBox_OnSelectionChanged"
+                          ContextMenuService.ShowOnDisabled="True">
+                    <ComboBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{x:Static res:Resources.Command_ShowInExternalEditor}" Command="{Binding ShowInExternalEditorCommand}"/>
+                        </ContextMenu>
+                    </ComboBox.ContextMenu>
+                </ComboBox>
+            </DockPanel>
+            
+            <WrapPanel DockPanel.Dock="Top"
+                       Margin="5">
+                <WrapPanel.Resources>
+                    <Style TargetType="CheckBox">
+                        <Setter Property="Margin" Value="0 0 5 0"/>
+                    </Style>
+                    <Style TargetType="RadioButton">
+                        <Setter Property="Margin" Value="0 0 5 0"/>
+                    </Style>
+                </WrapPanel.Resources>
+
+                <StackPanel Orientation="Horizontal" Margin="0 0 20 0">
+                    <TextBlock Text="{Binding Source={x:Static res:Resources.FilterLevel}, StringFormat='{}{0}: '}"/>
+                    <CheckBox Content="Debug" IsChecked="{Binding FilterLevel, Converter={StaticResource FilterConverter}, ConverterParameter=Level.Debug, Mode=TwoWay}"/>
+                    <CheckBox Content="Info" IsChecked="{Binding FilterLevel, Converter={StaticResource FilterConverter}, ConverterParameter=Level.Info, Mode=TwoWay}"/>
+                    <CheckBox Content="Warn" IsChecked="{Binding FilterLevel, Converter={StaticResource FilterConverter}, ConverterParameter=Level.Warn, Mode=TwoWay}"/>
+                    <CheckBox Content="Error" IsChecked="{Binding FilterLevel, Converter={StaticResource FilterConverter}, ConverterParameter=Level.Error, Mode=TwoWay}"/>
+                    <CheckBox Content="Fatal" IsChecked="{Binding FilterLevel, Converter={StaticResource FilterConverter}, ConverterParameter=Level.Fatal, Mode=TwoWay}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0 0 20 0">
+                    <TextBlock Text="{Binding Source={x:Static res:Resources.FilterHighlight}, StringFormat='{}{0}: '}"/>
+                    <RadioButton Content="Выкл" GroupName="Highlighted" IsChecked="{Binding FilterHighlighted, Converter={StaticResource FilterConverter}, ConverterParameter=Highlight.0, Mode=TwoWay}"/>
+                    <RadioButton Content="1" GroupName="Highlighted" IsChecked="{Binding FilterHighlighted, Converter={StaticResource FilterConverter}, ConverterParameter=Highlight.1, Mode=TwoWay}"/>
+                    <RadioButton Content="2" GroupName="Highlighted" IsChecked="{Binding FilterHighlighted, Converter={StaticResource FilterConverter}, ConverterParameter=Highlight.2, Mode=TwoWay}"/>
+                    <RadioButton Content="3" GroupName="Highlighted" IsChecked="{Binding FilterHighlighted, Converter={StaticResource FilterConverter}, ConverterParameter=Highlight.3, Mode=TwoWay}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Source={x:Static res:Resources.FilterText}, StringFormat='{}{0}: '}"/>
+                    <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+                    <CheckBox IsChecked="{Binding CaseSensitive, Converter={converter:BooleanToIsCheckedConverter}}" Content="{x:Static res:Resources.FilterTextCaseSensitive}"/>
+                </StackPanel>
+            </WrapPanel>
+            
+            <DataGrid Name="LogGrid"
+                      ItemsSource="{Binding SourceView.View}" 
+                      IsReadOnly="True"
+                      CanUserAddRows="False"
+                      AutoGenerateColumns="False"
+                      SelectionUnit="FullRow"
+                      GridLinesVisibility="Vertical"
+                      VerticalGridLinesBrush="LightGray">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="BorderThickness" Value="0 1 0 0"/>
+                        <Setter Property="BorderBrush" Value="LightGray"/>
+                        <Setter Property="Background" Value="{Binding Path=HighlightLevel, Converter={converter:IntToBrushConverter}, ConverterParameter={StaticResource HighlightingColors}}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsNextSecond}" Value="True">
+                                <Setter Property="BorderBrush" Value="Black"/>
+                             </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{x:Static res:Resources.Columns_Header_Time}" HeaderTemplate="{StaticResource DateTimeColumnHeaderTemplate}"/>
+                    <DataGridTextColumn Header="{x:Static res:Resources.Columns_Header_Level}"/>
+                    <DataGridTextColumn Header="{x:Static res:Resources.Columns_Header_Cite}"/>
+                    <DataGridTextColumn Header="{x:Static res:Resources.Columns_Header_Message}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+        <ToggleButton IsChecked="{Binding IsScrolledToEnd}" 
+                      Content="⤓"  FontWeight="Bold"
+                      Width="{x:Static SystemParameters.VerticalScrollBarWidth}" 
+                      Height="{x:Static SystemParameters.HorizontalScrollBarHeight}"
+                      HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+                      Margin="0" Padding="1,-4,0,0" FontSize="{Binding ScrolledToEndButtonFontSize}"
+                      Focusable="False"
+                      Click="ScrollToEndButton_OnClick">
+            <ToggleButton.ToolTip>
+                <Binding Path="IsScrolledToEnd">
+                    <Binding.Converter>
+                        <converter:BooleanToTextConverter IsTrue="{x:Static res:Resources.Button_ScrollToTop_On}"
+                                                          IsFalse="{x:Static res:Resources.Button_ScrollToTop_Off}" />
+                    </Binding.Converter>
+                </Binding>
+            </ToggleButton.ToolTip>
+        </ToggleButton>
+    </Grid>
+</Window>

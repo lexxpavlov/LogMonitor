@@ -1,0 +1,76 @@
+﻿<Window x:Class="LogMonitor.SelectFileWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converter="clr-namespace:LogMonitor.Converters"
+        xmlns:local="clr-namespace:LogMonitor"
+        xmlns:monitoring="clr-namespace:LogMonitor.Monitoring"
+        xmlns:res="clr-namespace:LogMonitor.Properties"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        Title="{x:Static res:Resources.SelectFileWindow_Title}" Height="400" Width="800"
+        d:DataContext="{d:DesignInstance local:SelectFileWindowVm, IsDesignTimeCreatable=True}"
+        x:Name="Root">
+    <Window.Resources>
+        <converter:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter"/>
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Column="0">
+            <DockPanel DockPanel.Dock="Top" >
+                <Button Content="{x:Static res:Resources.SelectFileWindow_Browse}" 
+                        Padding="20 0" 
+                        DockPanel.Dock="Right"
+                        Command="{Binding BrowseCommand}"/>
+                <Label Content="{x:Static res:Resources.SelectFileWindow_Files}"/>
+            </DockPanel>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="{x:Static res:Resources.SelectFileWindow_Select}" 
+                        Margin="0 10 0 0"
+                        Padding="20 0"
+                        Command="{Binding SelectCommand}"/>
+            </StackPanel>
+            <GroupBox DockPanel.Dock="Bottom" DataContext="{Binding SelectedFile}" Header="{x:Static res:Resources.SelectFileWindow_SelectedFile}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="{converter:StringFormat '{}{0}: ', {x:Static res:Resources.Name}}"/>
+                        <Label Content="{Binding FileName}"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+            <ListBox ItemsSource="{Binding Files}"
+                     DisplayMemberPath="FileName"
+                     SelectedItem="{Binding SelectedFile}"/>
+        </DockPanel>
+        <DockPanel Grid.Column="2"
+                   LastChildFill="True"
+                   MinWidth="200">
+            <Label DockPanel.Dock="Top" 
+                   Content="{x:Static res:Resources.SelectFileWindow_Mappings}"/>
+            <GroupBox DockPanel.Dock="Bottom" DataContext="{Binding SelectedMapping}" Header="{x:Static res:Resources.SelectFileWindow_SelectedMapping}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="{converter:StringFormat '{}{0}: ', {x:Static res:Resources.Name}}"/>
+                        <Label Content="{Binding Name}"/>
+                        <Label Content="{converter:StringFormat '{}({0})', {x:Static res:Resources.Default_lowercase}}" 
+                               Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
+                    <Label Content="{converter:StringFormat '{}{0}: ', {x:Static res:Resources.Columns}}"/>
+                    <ItemsControl ItemsSource="{Binding Columns}" DisplayMemberPath="Header" Margin="20 0 0 0"/>
+                </StackPanel>
+            </GroupBox>
+            <ListBox ItemsSource="{Binding Mappings}" SelectedItem="{Binding SelectedMapping}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="monitoring:ColumnMapping">
+                        <TextBlock Text="{Binding Name}" FontWeight="{Binding IsDefault, Converter={StaticResource BooleanToFontWeightConverter}}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </Grid>
+</Window>
