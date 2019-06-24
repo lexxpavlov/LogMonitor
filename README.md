@@ -71,9 +71,13 @@ Settings stored in ```LogMonitor.exe.config``` file in ```MonitorSection``` sect
 SavedLogs
 ---------
 **mapping**: one of saved column mappings.
+
 **autostart**: run monitoring after open log file.
+
 **filterLevels**: filter lines for this checked levels.
+
 **filterHighlight**: filter lines where text starts of highlighting symbols (```*``` or ```#```). This symbols may be used for highlight lines for debug purpose.
+
 **filterText**: filter lines for text.
 ```
   <MonitorSection>
@@ -87,7 +91,9 @@ SavedLogs
 Window config
 -----
 **Monitor**: Number of startup monitor (>=1). Defaults to zero (window shows at monitor where mouse point shown).
+
 **Position types**: vertical position of window on screen. Values: Center, Top, Bottom. Default: Center
+
 **Width** and **height**: SIze of window on screen.
 ```
     <Window width="1920" height="350" monitor="2" position="Bottom"/>
@@ -111,7 +117,8 @@ Column mappings
 The mappings of columns for various formats of log.
 
 **Mapping mode**: line format mode - ```separator``` or ```pattern```.
-**Column types**: Text, Time, Level, Message, Skip. Default: Text -->
+
+**Column types**: Text, Time, Level, Message, Skip. Default: Text
 
 ```
     <ColumnMapping name="default" separator="|" default="true">
