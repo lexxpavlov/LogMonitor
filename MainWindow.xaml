@@ -123,7 +123,7 @@
 
                 <StackPanel Orientation="Horizontal" Margin="0 0 20 0">
                     <TextBlock Text="{Binding Source={x:Static res:Resources.FilterHighlight}, StringFormat='{}{0}: '}"/>
-                    <RadioButton Content="Выкл" GroupName="Highlighted" IsChecked="{Binding FilterHighlighted, Converter={StaticResource FilterConverter}, ConverterParameter=Highlight.0, Mode=TwoWay}"/>
+                    <RadioButton Content="{x:Static res:Resources.Off}" GroupName="Highlighted" IsChecked="{Binding FilterHighlighted, Converter={StaticResource FilterConverter}, ConverterParameter=Highlight.0, Mode=TwoWay}"/>
                     <RadioButton Content="1" GroupName="Highlighted" IsChecked="{Binding FilterHighlighted, Converter={StaticResource FilterConverter}, ConverterParameter=Highlight.1, Mode=TwoWay}"/>
                     <RadioButton Content="2" GroupName="Highlighted" IsChecked="{Binding FilterHighlighted, Converter={StaticResource FilterConverter}, ConverterParameter=Highlight.2, Mode=TwoWay}"/>
                     <RadioButton Content="3" GroupName="Highlighted" IsChecked="{Binding FilterHighlighted, Converter={StaticResource FilterConverter}, ConverterParameter=Highlight.3, Mode=TwoWay}"/>
