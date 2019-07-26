@@ -4,6 +4,8 @@ LogMonitor
 
 Real-time monitoring tool for log files.
 
+![LogMonitor screenshot](Docs/screenshot1.png)
+
 Usage
 =====
 
